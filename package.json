@@ -1,0 +1,17 @@
+{
+  "name": "webdata",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js WHLM PBTS PT NUAN EARS ZNTL LHDX PLBY LMNX FBIO ATXI"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "himalaya": "^1.1.0",
+    "puppeteer": "^8.0.0"
+  }
+}
