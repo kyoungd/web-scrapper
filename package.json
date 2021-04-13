@@ -15,8 +15,6 @@
     "dotenv": "^8.2.0",
     "himalaya": "^1.1.0",
     "html-to-json": "^0.6.0",
-    "puppeteer": "^8.0.0",
-    "xml2json": "^0.12.0",
-    "xml2json-light": "^1.0.6"
+    "puppeteer": "^8.0.0"
   }
 }
