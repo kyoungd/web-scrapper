@@ -5,13 +5,18 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js WHLM PBTS PT NUAN EARS ZNTL LHDX PLBY LMNX FBIO ATXI"
+    "start": "node index.js BTN"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.1",
+    "dotenv": "^8.2.0",
     "himalaya": "^1.1.0",
-    "puppeteer": "^8.0.0"
+    "html-to-json": "^0.6.0",
+    "puppeteer": "^8.0.0",
+    "xml2json": "^0.12.0",
+    "xml2json-light": "^1.0.6"
   }
 }

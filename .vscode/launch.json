@@ -12,7 +12,7 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/index.js",
-            "args": ["CELC", "REPX", "BTX", "AFMD"]
+            "args": ["BTN", "REPX", "BTX", "AFMD"]
         }
     ]
 }
