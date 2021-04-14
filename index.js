@@ -82,6 +82,27 @@ function xml2Object(data) {
     return obj;
 }
 
+function isFinvizNewsStillRelevent(dateStr, isLastNewsRelevant) {
+    const nowDate = new Date();
+    const newsDate = new Date(dateStr.split(" ")[0]);
+    if (newsDate == "Invalid Date")
+        return isLastNewsRelevant;
+    return (newsDate > nowDate.setDate(nowDate.getDate() - 7));
+}
+
+function isBenzingaNewsStillRelevent(dateStr, isLastNewsRelevant) {
+    const nowDate = new Date();
+    const newsDate = new Date(dateStr);
+    return (newsDate > nowDate.setDate(nowDate.getDate() - 7));
+}
+
+function isNewsStillRelevant(parseType, dateStr, isLastNewsRelevant) {
+    const isRelevant = (parseType == "finviz" ?
+        isFinvizNewsStillRelevent(dateStr, isLastNewsRelevant) :
+        isBenzingaNewsStillRelevent(dateStr, isLastNewsRelevant));
+    return isRelevant;
+}
+
 let pageLoadCount = 0;
 
 async function finviz(page, url) {
@@ -114,27 +135,32 @@ async function finviz(page, url) {
             + getFinvizData("share-float", finvizData)
             + "  |  short-float: "
             + getFinvizData("short-float", finvizData);
-
         console.log(dataText);
 
         let newsText = [];
         let lineCount = 0;
         const newsArray = newsJson[0].children;
+        let isLastNewsRelevant = false;
         for (let ix = 0; ix < newsArray.length; ix++) {
             const data = newsArray[ix];
             if (data.children.length > 0) {
-                const oneNews = getFinvizNews("date", data)
-                    + ": " + getFinvizNews("title", data)
-                    + " (" + getFinvizNews("source", data) + ") "
-                    + getFinvizNews("quality", data)
-                newsText.push(oneNews);
-                console.log(oneNews);
-                ++lineCount;
+                const newsDate = getFinvizNews("date", data);
+                if (isNewsStillRelevant("finviz", newsDate, isLastNewsRelevant)) {
+                    isLastNewsRelevant = true;
+                    const oneNews = newsDate
+                        + ": " + getFinvizNews("title", data)
+                        + " (" + getFinvizNews("source", data) + ") "
+                        + getFinvizNews("quality", data)
+                    newsText.push(oneNews);
+                    console.log(oneNews);
+                    ++lineCount;
+                }
+                else
+                    isLastNewsRelevant = false;
             }
             if (lineCount > 6)
                 break;
         }
-
         const dataset = { newsText, dataText, news: newsHtml, data: dataHtml };
         return dataset;
     }
@@ -174,17 +200,22 @@ async function benzinga(page, url) {
     const newsHtml = await xml2Object(newsHtm);
 
     const newsArray = newsHtml[0].children;
+    let isLastNewsRelevant = false;
     let newsText = [];
     for (let ix = 0; ix < newsArray.length; ix++) {
         try {
             const data = newsArray[ix];
-            const oneNews = getBenzingaNews("date", data)
-                + ": " + getBenzingaNews("title", data)
-                + " (" + getBenzingaNews("source", data) + ")";
-            newsText.push(oneNews);
-            console.log(oneNews);
-            if (ix >= 8)
-                break;
+            const newsDate = getBenzingaNews("date", data);
+            if (isNewsStillRelevant("benzinga", newsDate, isLastNewsRelevant)) {
+                isLastNewsRelevant = true;
+                const oneNews = newsDate
+                    + ": " + getBenzingaNews("title", data)
+                    + " (" + getBenzingaNews("source", data) + ")";
+                newsText.push(oneNews);
+                console.log(oneNews);
+            }
+            else
+                isLastNewsRelevant = false;
         }
         catch (e) {
             console.log("benzinga: " + e);
@@ -230,6 +261,8 @@ async function main(symbols) {
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     console.log(symbols);
+    let finvizData = [];
+    let benzingaData = [];
     for (let ix = 2; ix < symbols.length; ++ix) {
         const symbol = symbols[ix];
         console.log('');
@@ -242,6 +275,7 @@ async function main(symbols) {
             pageLoadCount = 0;
             const result1 = await finviz(page, url1);
             //        await save(url1, "finviz", "finviz", result1, process.env.EMAIL);
+            finvizData.push(result1);
         }
         catch (e) {
             console.log("main-finviz: " + e);
@@ -250,12 +284,19 @@ async function main(symbols) {
         try {
             const result2 = await benzinga(page, url2);
             //        await save(url2, "benzinga", "benzinga", result2, process.env.EMAIL);
+            benzingaData.push(result2);
         }
         catch (e) {
             console.log("main-benzinga: " + e);
         }
     }
     browser.close();
+    console.log(' -------------------------------------------- ');
+    for (let ix = 0; ix < finvizData.length; ++ix) {
+        const symbol = symbols[ix + 2];
+        const data = finvizData[ix];
+        console.log(symbol + " - " + data.dataText + ", ");
+    }
 }
 
 // const symbolToSearch = 'CELC,REPX,BTX,AFMD';
