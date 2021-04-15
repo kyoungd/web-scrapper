@@ -46,3 +46,17 @@ module.exports.xml2Object = function (data) {
     const obj = himalaya.parse(htmlData);
     return obj;
 }
+
+module.exports.isFinvizNewsStillRelevent = function (dateStr, isLastNewsRelevant) {
+    const nowDate = new Date();
+    const newsDate = new Date(dateStr.split(" ")[0]);
+    if (newsDate == "Invalid Date")
+        return isLastNewsRelevant;
+    return (newsDate > nowDate.setDate(nowDate.getDate() - 7));
+}
+
+module.exports.isBenzingaNewsStillRelevent = function (dateStr, isLastNewsRelevant) {
+    const nowDate = new Date();
+    const newsDate = new Date(dateStr);
+    return (newsDate > nowDate.setDate(nowDate.getDate() - 7));
+}
