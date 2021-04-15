@@ -6,40 +6,9 @@ const dotenv = require("dotenv")
 const axios = require("axios");
 const himalaya = require('himalaya');
 const { exception } = require('console');
+const util = require('./src/util');
 
-dotenv.config()
-
-async function removeElementByClass(className) {
-    let div_selector_to_remove = className;
-    await page.evaluate((sel) => {
-        var elements = document.querySelectorAll(sel);
-        for (var i = 0; i < elements.length; i++) {
-            elements[i].parentNode.removeChild(elements[i]);
-        }
-    }, div_selector_to_remove)
-}
-
-async function clickButton(page, xpath) {
-    try {
-        // xpath = "/html/body/div[11]/div[2]/div[2]";
-        // xpthh = "/html/body/div[10]/div[2]/div[2]";
-        const searchBtn = await page.$x(xpath);
-        searchBtn[0].click();
-    }
-    catch { }
-}
-
-function cleanHtml(data) {
-    return data
-        .replace(/\n/g, "")
-        .replace(/(&)nbsp;/g, "")
-        .replace(/<tr\s.*?>/g, '<tr>')
-        .replace(/<td\s.*?>/g, '<td>')
-        .replace(/<div\s.*?>/g, '<div>')
-        .replace(/<a\s.*?>/g, '<a>')
-        .replace(/<span\s.*?>/g, '<span>')
-        .replace(/<br.*?>/g, '<br />');
-}
+dotenv.config();
 
 function getFinvizData(name, data) {
     switch (name) {
@@ -69,17 +38,6 @@ function getFinvizNews(name, data) {
         default:
             return "unknown name in getFinvizNews()";
     }
-}
-
-function replaceNbsps(str) {
-    var re = new RegExp(String.fromCharCode(160), "g");
-    return str.replace(re, " ");
-}
-
-function xml2Object(data) {
-    const htmlData = replaceNbsps(data);
-    const obj = himalaya.parse(htmlData);
-    return obj;
 }
 
 function isFinvizNewsStillRelevent(dateStr, isLastNewsRelevant) {
@@ -112,24 +70,24 @@ async function finviz(page, url) {
         // await page.goto(url);
         await page.goto(url, { waitUntil: 'networkidle2' });
 
-        // clickButton(page, "/html/body/div[10]/div[2]/div[2]");
-        // clickButton(page, "/html/body/div[11]/div[2]/div[2]");
-        // await removeElementByClass("ic_dimm1519 ic_fade-in1519");
+        // util.clickButton(page, "/html/body/div[10]/div[2]/div[2]");
+        // util.clickButton(page, "/html/body/div[11]/div[2]/div[2]");
+        // await util.removeElementByClass("ic_dimm1519 ic_fade-in1519");
         const xpath1 = '//*[@id="news-table"]';
         const [el] = await page.$x(xpath1);
         const NewsH = await el.getProperty('innerHTML');
         // const newsT = await el.getProperty('innerText');
         // const newsText = await newsT.jsonValue();
         const newsHt = await NewsH.jsonValue();
-        const newsHtml = cleanHtml(newsHt);
-        const newsJson = xml2Object(newsHtml);
+        const newsHtml = util.cleanHtml(newsHt);
+        const newsJson = util.xml2Object(newsHtml);
 
         const xpath2 = '/html/body/div[4]/div/table[2]';
         const [stat] = await page.$x(xpath2);
         const dataH = await stat.getProperty('innerHTML');
         const dataHt = await dataH.jsonValue();
-        const dataHtml = cleanHtml(dataHt);
-        const finvizData = await xml2Object(dataHtml);
+        const dataHtml = util.cleanHtml(dataHt);
+        const finvizData = util.xml2Object(dataHtml);
 
         const dataText = "share-float: "
             + getFinvizData("share-float", finvizData)
@@ -196,8 +154,8 @@ async function benzinga(page, url) {
     const [el] = await page.$x(xpath);
     const NewsH = await el.getProperty('innerHTML');
     const newsHt = await NewsH.jsonValue();
-    const newsHtm = cleanHtml(newsHt);
-    const newsHtml = await xml2Object(newsHtm);
+    const newsHtm = util.cleanHtml(newsHt);
+    const newsHtml = util.xml2Object(newsHtm);
 
     const newsArray = newsHtml[0].children;
     let isLastNewsRelevant = false;
