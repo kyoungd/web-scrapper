@@ -59,7 +59,7 @@ module.exports.finviz = async function (page, url) {
         const dataHtml = util.cleanHtml(dataHt);
         const finvizData = util.xml2Object(dataHtml);
 
-        const dataText = "share-float: "
+        let dataText = "share-float: "
             + getFinvizData("share-float", finvizData)
             + "  |  short-float: "
             + getFinvizData("short-float", finvizData);
@@ -82,6 +82,8 @@ module.exports.finviz = async function (page, url) {
                     newsText.push(oneNews);
                     console.log(oneNews);
                     ++lineCount;
+                    if (lineCount == 1)
+                        dataText += " | " + oneNews;
                 }
                 else
                     isLastNewsRelevant = false;
