@@ -14,7 +14,7 @@ function getBenzingaNews(name, data) {
     }
 }
 
-module.exports.benzinga = async function (page, url) {
+async function getBenzinga(page, url) {
     // await page.goto(url, { waitUntil: 'networkidle2' });
     await page.goto(url);
 
@@ -53,4 +53,20 @@ module.exports.benzinga = async function (page, url) {
 
     const dataset = { newsText: newsText, news: newsHtml };
     return dataset;
+}
+
+module.exports.benzinga = async function (page, url) {
+    let pageLoadCount = 0;
+    try {
+        return (await getBenzinga(page, url));
+    }
+    catch (e) {
+        console.log('ERROR: ' + e);
+        if (e.message.indexOf("timeout") > 0 && pageLoadCount < 5) {
+            ++pageLoadCount;
+            return (await getBenzinga(page, url));
+        }
+        else
+            throw exception(e);
+    }
 }
